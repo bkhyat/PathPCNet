@@ -4,6 +4,8 @@ The code base for PathPCNet. From Pathways to Principal Components: An Interpret
 Prediction
 Authors: Bikhyat Adhikari, Ananda Mohan Mondal
 
+![End-to-end Pipeline for PathPCNet](images/PathPCNet_Pipeline.svg)
+
 #### Running Parallel Experiment:
 
 Objective: To evaluate the model for different set of features and varying number of principal components. The script
