@@ -9,14 +9,12 @@ Authors: Bikhyat Adhikari, Ananda Mohan Mondal
 Objective: To evaluate the model for different set of features and varying number of principal components. The script
 trains and evaluates the model across different subset of features and number of principal components in parallel across
 different cuda devices available in the system.
+
 **PS**: You would get an assertion error if you run this code without Cuda, the code is specifically written to run in
 parallel in GPU because the experiment is very time-consuming.
 
 ```python
-python
-parallel_experiments.py - i
-path_to_input_CSV_file.csv - o
-output_directory
+python parallel_experiments.py - i path_to_input_CSV_file.csv - o output_directory
 ```
 
 The input data should have the following format:
