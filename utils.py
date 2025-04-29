@@ -7,14 +7,38 @@ import torch.utils.data as torch_data_utils
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 
-def get_device(cuda=7):
+def get_device(cuda=None):
     """return device string either cpu or cuda:0"""
     if torch.cuda.is_available():
-        device = 'cuda:' + str(cuda)  # 'cuda:0'
+        if cuda is None:
+            cuda = get_gpu_with_max_free_memory()
+        elif cuda ==-1:
+            return "cpu"
+        elif cuda>=torch.cuda.device_count():
+            print(f"Specified Cuda:{cuda} does not exist. Falling back to CPU.")
+            return "cpu"
+        device = 'cuda:' + str(cuda)
     else:
+        if not (cuda is None or cuda==-1):
+            print(f"Cuda not available. Falling back to CPU")
         device = 'cpu'
     print('current device={:}'.format(device))
     return device
+
+
+def get_gpu_with_max_free_memory():
+    best_gpu = None
+    max_free_mem = 0
+
+    for i in range(torch.cuda.device_count()):
+        stats = torch.cuda.mem_get_info(i)  # (free, total)
+        free_memory = stats[0] / (1024 ** 2)  # convert bytes -> MiB
+
+        if free_memory > max_free_mem:
+            max_free_mem = free_memory
+            best_gpu = i
+
+    return best_gpu
 
 
 def set_seed(seed=42):
