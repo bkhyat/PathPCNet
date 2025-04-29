@@ -1,16 +1,16 @@
-import torch
-import numpy as np
 from datetime import datetime
+
+import numpy as np
+import scipy
+import torch
 import torch.utils.data as torch_data_utils
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-import scipy
-import pandas as pd
 
 
 def get_device(cuda=7):
     """return device string either cpu or cuda:0"""
     if torch.cuda.is_available():
-        device = 'cuda:'+str(cuda) #'cuda:0'
+        device = 'cuda:' + str(cuda)  # 'cuda:0'
     else:
         device = 'cpu'
     print('current device={:}'.format(device))
@@ -54,7 +54,7 @@ class NumpyDataset(torch_data_utils.Dataset):
         return len(self.X)
 
 
-def evaluate_model(df, y_true_col, y_pred_col, extra_meta=None, start_time = None, verbose=True):
+def evaluate_model(df, y_true_col, y_pred_col, extra_meta=None, start_time=None, verbose=True):
     """
     return RMSE, R2, PCC
     """
@@ -87,7 +87,7 @@ def evaluate_model(df, y_true_col, y_pred_col, extra_meta=None, start_time = Non
 
     if start_time:
         end_time = datetime.now()
-        result['Execution Time']=(end_time-start_time).total_seconds()
+        result['Execution Time'] = (end_time - start_time).total_seconds()
 
     if verbose:
         print(result)
@@ -114,17 +114,18 @@ class NumpyDataset(torch_data_utils.Dataset):
 
 class RMSELoss(torch.nn.Module):
     def __init__(self):
-        super(RMSELoss,self).__init__()
+        super(RMSELoss, self).__init__()
 
-    def forward(self,x,y):
+    def forward(self, x, y):
         eps = 1e-6
         criterion = torch.nn.MSELoss()
         loss = torch.sqrt(criterion(x, y) + eps)
         return loss
 
 
-class EarlyStopping: #ref:https://github.com/Bjarten/early-stopping-pytorch/blob/master/pytorchtools.py
+class EarlyStopping:  # ref:https://github.com/Bjarten/early-stopping-pytorch/blob/master/pytorchtools.py
     """Early stops the training if validation loss doesn't improve after a given patience."""
+
     def __init__(self, patience=7, verbose=False, delta=0, path='checkpoint.pt'):
         """
         Args:

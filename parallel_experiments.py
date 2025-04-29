@@ -1,12 +1,13 @@
 import argparse
-import numpy as np
-import pandas as pd
-from datetime import datetime
-import os
 import json
 import multiprocessing as mp
-import sklearn.model_selection as skms
+import os
+from datetime import datetime
+
+import numpy as np
+import pandas as pd
 import sklearn.metrics as skmts
+import sklearn.model_selection as skms
 import sklearn.utils as skut
 import torch
 import torch.utils.data as torch_data_utils
@@ -25,11 +26,13 @@ ALL_PREFIXES = ("EXP", "CNV", "MUT")
 FEATURE_PREFIXES = tuple(), ("EXP",), ("MUT",), ("CNV",), ("EXP", "MUT"), ("EXP", "CNV"), ("MUT", "CNV")
 FEATURE_SUFFIXES = ("PC2", "PC3", "PC4"), ("PC3", "PC4"), ("PC4",), tuple()
 
+
 # Argument parser
 def parse_parameter():
     parser = argparse.ArgumentParser(description="Run parallel experiment on multiple GPUs")
     parser.add_argument("-i", "--input_path", required=True, help="input path")
-    parser.add_argument("-s", "--seed_int", default=42, type=int, help="seed for reproducibility. default=42")
+    parser.add_argument("-s", "--seed_int", default=42, type=int, help="seed for reproducibility. "
+                                                                       "default=42")
     parser.add_argument("-c", "--cv_int", default=10, type=int, help="K fold cross validation. default=10")
     parser.add_argument("-o", "--output_path", default="out", help="output path")
     return parser.parse_args()
@@ -113,7 +116,8 @@ def run_training_job(prefix, suffix, device, args, shared_metrics):
         net.init_weights()
 
         train_loss_list, valid_loss_list = net.fit(train_dl, valid_dl, EPOCH, LEARNING_RATE, device,
-                                                   opt_fn, os.path.join(args.output_path, CHECK_POINT_PATH, comb_name + ".pt"))
+                                                   opt_fn,
+                                                   os.path.join(args.output_path, CHECK_POINT_PATH, comb_name + ".pt"))
         prediction_list = net.predict(test_dl, device)
 
         mse = skmts.mean_squared_error(ytest_arr, prediction_list)
@@ -140,13 +144,16 @@ def run_training_job(prefix, suffix, device, args, shared_metrics):
     all_ytest_df.to_csv(os.path.join(args.output_path, comb_name + '_prediction.csv'), header=True)
     all_loss_df.to_csv(os.path.join(args.output_path, comb_name + '_loss.csv'), header=True)
 
-    metrics =  evaluate_model(all_ytest_df, 'LN_IC50', 'prediction', {"data": "+".join(feature_sets), "N_PCs": n_pcs}, start_time)
+    metrics = evaluate_model(all_ytest_df, 'LN_IC50', 'prediction',
+                             {"data": "+".join(feature_sets), "N_PCs": n_pcs},
+                             start_time)
     shared_metrics.append(metrics)
 
     # with open(os.path.join(args.output_path, f"{comb_name}_metrics.json"), "w") as f:
     #     json.dump(metrics, f, indent=2)
 
     print(f"[GPU {device}] Finished {comb_name}")
+
 
 if __name__ == "__main__":
     assert GPU_COUNT != 0, "No Cuda Available!"

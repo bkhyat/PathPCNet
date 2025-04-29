@@ -1,7 +1,8 @@
-import torch
 import numpy as np
+import torch
 
 from utils import RMSELoss, EarlyStopping, weight_initializer
+
 
 class PathPCNet(torch.nn.Module):
     def __init__(self, n_inputs, dropout_rate=0.1):
@@ -32,7 +33,6 @@ class PathPCNet(torch.nn.Module):
 
     def forward(self, x):
         return self.model(x)
-
 
     def fit(self, train_dl, valid_dl, epochs, learning_rate, device, opt_fn, path="checkpoint.pt", verbose=False):
         """
