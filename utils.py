@@ -119,23 +119,6 @@ def evaluate_model(df, y_true_col, y_pred_col, extra_meta=None, start_time=None,
     return result
 
 
-class NumpyDataset(torch_data_utils.Dataset):
-    """
-    Return torch dataset, Given X and y numpy array
-    """
-
-    def __init__(self, X_arr, y_arr):
-        self.X = X_arr
-        self.y = y_arr
-        self.y = self.y.reshape((len(self.y), 1))
-
-    def __getitem__(self, index):
-        return self.X[index], self.y[index]
-
-    def __len__(self):
-        return len(self.X)
-
-
 class RMSELoss(torch.nn.Module):
     def __init__(self):
         super(RMSELoss, self).__init__()
