@@ -68,14 +68,14 @@ def pull_smiles_from_pubchem(file_path: str) -> pd.DataFrame:
 def parse_parameter():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--drug_list_file_path", required=True)
-    parser.add_argument("-o", "--out_dir", default="filtered_data")
+    parser.add_argument("-o", "--out_path", default="filtered_data")
 
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_parameter()
-    os.makedirs(args.out_dir, exist_ok=True)
+    os.makedirs(args.out_path, exist_ok=True)
     drugs_df = pd.read_csv(args.drug_list_file_path)
     drugs_df.columns = drugs_df.columns.str.strip().str.lower()
     drugs_df = drugs_df.loc[drugs_df["datasets"].eq("GDSC2")]
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     drugs_df = drugs_df[drugs_df.smiles.str.len() == 1].reset_index(drop=True)
     drugs_df = drugs_df.explode("smiles")
     drugs_df = drugs_df.loc[drugs_df.groupby("smiles")["number of cell lines"].idxmax()].reset_index(drop=True)
-    file_path = os.path.join(args.out_dir,
+    file_path = os.path.join(args.out_path,
                              os.path.splitext(os.path.basename(args.drug_list_file_path))[0] + "SMILES.csv")
     drugs_df.to_csv(file_path, index=False)
 
