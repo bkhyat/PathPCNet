@@ -1,8 +1,9 @@
+import argparse
+import os
+
 import pandas as pd
 from sklearn.decomposition import PCA
 
-import argparse
-import os
 from utils import get_pathway_genes
 
 
@@ -25,12 +26,14 @@ def get_pathway_pcs(data: pd.DataFrame, pathways, prefix: str, n_components=4) -
 
     return result
 
+
 def parse_parameter():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--in_path", required=True)
     parser.add_argument("-o", "--out_path", default="filtered_data")
 
     return parser.parse_args()
+
 
 if __name__ == "__main__":
     args = parse_parameter()
