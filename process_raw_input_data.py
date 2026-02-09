@@ -1,6 +1,7 @@
 import argparse
-import os
 import json
+import os
+
 import numpy as np
 import pandas as pd
 
@@ -89,7 +90,7 @@ def get_args():
     parser.add_argument('--response', type=str, required=True,
                         help='File name for the fitted drug response file')
     parser.add_argument('--out_path', type=str, default="out",
-                        help='The output directory. Generated file(s) will be stored in this directory.')
+                        help='The output directory. Generated files will be stored in this directory.')
 
     return parser.parse_args()
 
