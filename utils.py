@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 import numpy as np
@@ -12,14 +13,14 @@ def get_device(cuda=None):
     if torch.cuda.is_available():
         if cuda is None:
             cuda = get_gpu_with_max_free_memory()
-        elif cuda ==-1:
+        elif cuda == -1:
             return "cpu"
-        elif cuda>=torch.cuda.device_count():
+        elif cuda >= torch.cuda.device_count():
             print(f"Specified Cuda:{cuda} does not exist. Falling back to CPU.")
             return "cpu"
         device = 'cuda:' + str(cuda)
     else:
-        if not (cuda is None or cuda==-1):
+        if not (cuda is None or cuda == -1):
             print(f"Cuda not available. Falling back to CPU")
         device = 'cpu'
     print('current device={:}'.format(device))
@@ -179,3 +180,26 @@ class EarlyStopping:  # ref:https://github.com/Bjarten/early-stopping-pytorch/bl
             print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
         torch.save(model.state_dict(), self.path)
         self.val_loss_min = val_loss
+
+
+def parse_pathway(raw_file_path):
+    pathways_dict = {}
+    unique_genes = set()
+    with open(raw_file_path, "r") as f:
+        for line in f:
+            line = line.strip().split("\t")
+            genes = [gene.strip() for gene in line[2:]]
+            pathways_dict[line[0].strip()] = genes
+            unique_genes = unique_genes.union(genes)
+
+    return pathways_dict, unique_genes
+
+
+def get_pathway_genes(file_path):
+    with open(file_path, "r") as f:
+        pathways = json.load(f)
+    genes_list = []
+    for gene in pathways.values():
+        genes_list.extend(gene)
+
+    return pathways, set(genes_list)
