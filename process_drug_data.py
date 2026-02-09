@@ -1,9 +1,10 @@
-import pandas as pd
-import pubchempy as pcp
-import functools
 import argparse
+import functools
 import os
 import time
+
+import pandas as pd
+import pubchempy as pcp
 from rdkit import Chem
 from rdkit.Chem import rdFingerprintGenerator
 
@@ -21,7 +22,7 @@ def retry(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         count = 0
-        while count<10:
+        while count < 10:
             try:
                 return func(*args, **kwargs)
             except pcp.ServerBusyError as e:
@@ -29,6 +30,7 @@ def retry(func):
                 time.sleep(1)
 
         raise e
+
     return wrapper
 
 
@@ -62,6 +64,7 @@ def pull_smiles_from_pubchem(file_path: str) -> pd.DataFrame:
 
     return df
 
+
 def parse_parameter():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--drug_list_file_path", required=True)
@@ -81,9 +84,9 @@ if __name__ == "__main__":
     drugs_df["smiles"] = smiles
     drugs_df = drugs_df[drugs_df.smiles.str.len() == 1].reset_index(drop=True)
     drugs_df = drugs_df.explode("smiles")
-    drugs_df=drugs_df.loc[drugs_df.groupby("smiles")["number of cell lines"].idxmax()].reset_index(drop=True)
-    file_path = os.path.join(args.out_dir, os.path.splitext(os.path.basename(args.drug_list_file_path))[0] + "SMILES.csv")
+    drugs_df = drugs_df.loc[drugs_df.groupby("smiles")["number of cell lines"].idxmax()].reset_index(drop=True)
+    file_path = os.path.join(args.out_dir,
+                             os.path.splitext(os.path.basename(args.drug_list_file_path))[0] + "SMILES.csv")
     drugs_df.to_csv(file_path, index=False)
 
     print(f"COMPLETE: SMILES pulled in {file_path}")
-
