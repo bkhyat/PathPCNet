@@ -5,22 +5,24 @@ from datetime import datetime
 import pandas as pd
 from pycaret.regression import *
 
+from utils import get_input_matrix
+
 
 def parse_parameter():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input_path", required=True)
-    parser.add_argument("-o", "--output_path", default="traditional_regression_out")
+    parser.add_argument("-i", "--in_path", required=True)
+    parser.add_argument("-o", "--out_path")
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_parameter()
 
-    df = pd.read_csv(args.input_path, index_col=[0, 1]) #.iloc[:200]
+    df = get_input_matrix(args.input_path, mfp_n_bits=256)
 
     os.makedirs(args.output_path, exist_ok=True)
 
-    # Drop 5th PC
+    # Drop 5th PC if exists
     df = df[[c for c in df if not c.endswith("PC5")]]
 
     all_metrics = []
