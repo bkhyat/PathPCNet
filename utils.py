@@ -1,11 +1,15 @@
 import json
+import os
 from datetime import datetime
 
 import numpy as np
+import pandas as pd
 import scipy
 import torch
 import torch.utils.data as torch_data_utils
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+from process_drug_data import get_morgan_fingerprint
 
 
 def get_device(cuda=None):
@@ -203,3 +207,28 @@ def get_pathway_genes(file_path):
         genes_list.extend(gene)
 
     return pathways, set(genes_list)
+
+
+def get_input_matrix(input_dir_path: str, mfp_n_bits: int = 256) -> pd.DataFrame:
+    """
+    The function reads smiles data from provided input dir then generates morgan fingerprint.
+    It finally gives in input matrix with all the features and the response column.
+    :param input_dir_path: The directory path to the folder containing preprocessed data in matrix format. This is
+    generated from the raw input data processing script.
+    :param mfp_n_bits: Number of bits for Morgan Fingerprint. Default is 256
+    :return: Returns a dataframe with feature and target values
+    """
+    # These files are expected to be in the provided input folder
+    cell_line_feat = pd.read_csv(os.path.join(input_dir_path, "cell_line_feat.csv"), index_col=0)
+    drug_response = pd.read_csv(os.path.join(input_dir_path, "response.csv"))
+    drug_smiles = pd.read_csv(os.path.join(input_dir_path, "smiles.csv"), index_col=0)
+
+    drug_mfp = drug_smiles.apply(lambda x: get_morgan_fingerprint([x], mfp_n_bits))
+    feat_mat = (
+        drug_response
+        .merge(cell_line_feat, left_on='COSMIC_ID', right_index=True)
+        .merge(drug_mfp, left_on="DRUG_ID", right_index=True)
+        .set_index(["COSMIC_ID", "DRUG_ID"])
+    )
+
+    return feat_mat
