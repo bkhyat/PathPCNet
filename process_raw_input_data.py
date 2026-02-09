@@ -89,7 +89,7 @@ def get_args():
                         help='File name for the mutation data file')
     parser.add_argument('--response', type=str, required=True,
                         help='File name for the fitted drug response file')
-    parser.add_argument('--out_path', type=str, default="out",
+    parser.add_argument('--out_path', type=str, default="processed_data",
                         help='The output directory. Generated files will be stored in this directory.')
 
     return parser.parse_args()
