@@ -1,13 +1,47 @@
 # PathPCNet
 
-The code base for PathPCNet. From Pathways to Principal Components: An Interpretable Framework for Drug Sensitivity
-Prediction
+The code base for PathPCNet.
 
-Authors: Bikhyat Adhikari, Ananda Mohan Mondal
+PathPCNet: Pathway Principal Component-Based Interpretable Framework for Drug Sensitivity Prediction
+Bikhyat Adhikari, Masrur Sobhan, Ananda Sutradhar, Giri Narasimhan, Ananda Mohan Mondal
+bioRxiv 2025.08.20.668802; doi: https://doi.org/10.1101/2025.08.20.668802
 
-![End-to-end Pipeline for PathPCNet](images/PathPCNet_Pipeline.svg)
+![End-to-end Pipeline for PathPCNet](images/workflow.png)
 
-#### Running Parallel Experiment:
+### 1. Preprocessing Raw Data
+
+Download the specified raw data files from the mentioned sources to a single folder, and provide the folder path as
+in_path, and specify the file names for each of the below. The script will convert the data into specific matrix format,
+apply transformation, and filter out common cell lines, pull SMILES
+
+```shell
+python process_raw_input_data.py --in_path data --pathway pathway.gmt --cell_line_list CellList  --drugs drugs.csv  --rna rna_seq.csv  --cnv cnv_WES.csv  --mutation mutation.csv  --response drug_screening.csv  --out_path processed_data
+```
+
+### 2. Generating Pathway PCA from processed data
+
+Before running the script, ensure the following files exist in the specified in_path folder:
+
+```shell
+python pathway_pca.py --in_path processed_data --out_path processed_data
+```
+
+### 3. Running experiments for traditional ML models
+
+To run this code, it requires the three files from step 2(cell_line_feat.csv) and step 3(drug_smiles.csv, response.csv)
+The script runs five traditional ML methods on pathway PCA and drug morgan fingerprint features.
+
+```shell
+python traditional_regression.py --in_path processed_data --out_path ./
+```
+
+### 4. Hyperparameter Tuning
+
+### 5. Evaluating Model for Original Gene Feature
+
+### 6. Evaluating Model for Pathway PCA feature
+
+#### 7. Running Parallel Experiment:
 
 Objective: To evaluate the model for different set of features and varying number of principal components. The script
 trains and evaluates the model across different subset of features and number of principal components in parallel across
@@ -16,8 +50,8 @@ different cuda devices available in the system.
 **PS**: You would get an assertion error if you run this code without Cuda, the code is specifically written to run in
 parallel in GPU because the experiment is very time-consuming.
 
-```python
-python parallel_experiments.py - i path_to_input_CSV_file.csv - o output_directory
+```shell
+python parallel_experiments.py -i path_to_input_CSV_file.csv -o output_directory
 ```
 
 The input data should have the following format:
