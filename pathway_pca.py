@@ -35,15 +35,11 @@ def parse_parameter():
     return parser.parse_args()
 
 
-if __name__ == "__main__":
-    args = parse_parameter()
-
-    pathways, genes = get_pathway_genes(os.path.join(args.in_path, "pathways.json"))
-    cnv_mat = pd.read_csv(os.path.join(args.in_path, "cnv_mat.csv"), index_col=0)
-    mut_mat = pd.read_csv(os.path.join(args.in_path, "mut_mat.csv"), index_col=0)
-    rna_mat = pd.read_csv(os.path.join(args.in_path, "rna_mat.csv"), index_col=0)
-
-    os.makedirs(args.out_path, exist_ok=True)
+def get_pca_from_raw_data_read(in_path: str):
+    pathways, genes = get_pathway_genes(os.path.join(in_path, "pathways.json"))
+    cnv_mat = pd.read_csv(os.path.join(in_path, "cnv_mat.csv"), index_col=0)
+    mut_mat = pd.read_csv(os.path.join(in_path, "mut_mat.csv"), index_col=0)
+    rna_mat = pd.read_csv(os.path.join(in_path, "rna_mat.csv"), index_col=0)
 
     for c in cnv_mat:
         rang = cnv_mat[c].max() - cnv_mat[c].min()
@@ -62,6 +58,13 @@ if __name__ == "__main__":
     mut_pcs = get_pathway_pcs(mut_mat, pathways, "MUT")
     rna_pcs = get_pathway_pcs(rna_mat, pathways, "EXP")
 
-    cell_line_feat_mat = pd.concat([cnv_pcs, mut_pcs, rna_pcs], axis=1)
+    return pd.concat([cnv_pcs, mut_pcs, rna_pcs], axis=1)
+
+
+if __name__ == "__main__":
+    args = parse_parameter()
+
+    os.makedirs(args.out_path, exist_ok=True)
+    cell_line_feat_mat = get_pca_from_raw_data_read(args.in_path)
 
     cell_line_feat_mat.to_csv(os.path.join(args.out_path, "cell_line_feat_mat.csv"))
