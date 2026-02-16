@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from datetime import datetime
 
 import numpy as np
@@ -209,7 +210,7 @@ def get_pathway_genes(file_path):
     return pathways, set(genes_list)
 
 
-def get_input_matrix(input_dir_path: str, mfp_n_bits: int = 256, raw=False) -> pd.DataFrame:
+def get_input_matrix(input_dir_path: str, mfp_n_bits: int = 256, n_pcs=4, raw=False) -> pd.DataFrame:
     """
     The function reads smiles data from provided input dir then generates morgan fingerprint.
     It finally gives in input matrix with all the features and the response column.
@@ -231,7 +232,7 @@ def get_input_matrix(input_dir_path: str, mfp_n_bits: int = 256, raw=False) -> p
         cell_line_feat = pd.concat([cnv_mat, mut_mat, exp_mat], axis=1)
     # Create PCA feat matrix, if missing (Needed for sample data run)
     elif not os.path.exists(os.path.join(input_dir_path, "cell_line_feat.tsv")):
-        cell_line_feat = get_pca_from_raw_data_read(input_dir_path)
+        cell_line_feat = get_pca_from_raw_data_read(input_dir_path, n_pcs)
     # Read the PCA feat matrix from files, coming from previous steps.
     else:
         cell_line_feat = pd.read_csv(os.path.join(input_dir_path, "cell_line_feat.csv"), index_col=0)
@@ -247,3 +248,20 @@ def get_input_matrix(input_dir_path: str, mfp_n_bits: int = 256, raw=False) -> p
     )
 
     return feat_mat
+
+
+def filter_pc_columns(df, n_pcs):
+    keep_cols = []
+
+    for col in df.columns:
+        # Check if column ends with PC<number>
+        match = re.search(r'PC(\d+)$', col)
+        if match:
+            pc_num = int(match.group(1))
+            if pc_num <= n_pcs:
+                keep_cols.append(col)
+        else:
+            # Keep all non-PC columns
+            keep_cols.append(col)
+
+    return df[keep_cols]
