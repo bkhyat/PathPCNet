@@ -14,6 +14,7 @@ def create_sample_data(input_path: str = "", output_path: str = "sample_data"):
     genes = set()
     for gene_list in pathways.values():
         genes = genes.union(gene_list)
+    genes = list(genes)
 
     cnv_mat = pd.read_csv(os.path.join(input_path, "cnv_mat.csv"), index_col=0)
     exp_mat = pd.read_csv(os.path.join(input_path, "exp_mat.csv"), index_col=0)
@@ -41,12 +42,16 @@ def create_sample_data(input_path: str = "", output_path: str = "sample_data"):
     smiles = smiles.sample(10)
     drug_response = drug_response[drug_response["DRUG_ID"].isin(smiles.index)]
 
-    cnv_mat.loc[filtered_cell_lines].to_csv(os.path.join(output_path, "cnv_mat.csv"))
-    exp_mat.loc[filtered_cell_lines].to_csv(os.path.join(output_path, "exp_mat.csv"))
-    mut_mat.loc[filtered_cell_lines].to_csv(os.path.join(output_path, "mut_mat.csv"))
+    # Write sample data files to the output folder
+    cnv_mat.loc[filtered_cell_lines, list(genes)].to_csv(os.path.join(output_path, "cnv_mat.csv"))
+    exp_mat.loc[filtered_cell_lines, list(genes)].to_csv(os.path.join(output_path, "exp_mat.csv"))
+    mut_mat.loc[filtered_cell_lines, list(genes)].to_csv(os.path.join(output_path, "mut_mat.csv"))
 
     drug_response.to_csv(os.path.join(output_path, "drug_response.csv"))
     smiles.to_csv(os.path.join(output_path, "drug_smiles.csv"))
+
+    with open(os.path.join(output_path, "pathways.json"), "w") as f:
+        json.dump(pathways, f)
 
 
 def get_args():
