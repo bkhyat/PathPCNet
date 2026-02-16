@@ -209,7 +209,7 @@ def get_pathway_genes(file_path):
     return pathways, set(genes_list)
 
 
-def get_input_matrix(input_dir_path: str, mfp_n_bits: int = 256) -> pd.DataFrame:
+def get_input_matrix(input_dir_path: str, mfp_n_bits: int = 256, raw=False) -> pd.DataFrame:
     """
     The function reads smiles data from provided input dir then generates morgan fingerprint.
     It finally gives in input matrix with all the features and the response column.
@@ -219,9 +219,18 @@ def get_input_matrix(input_dir_path: str, mfp_n_bits: int = 256) -> pd.DataFrame
     :return: Returns a dataframe with feature and target values
     """
     # These files are expected to be in the provided input folder
-    cell_line_feat = pd.read_csv(os.path.join(input_dir_path, "cell_line_feat.csv"), index_col=0)
-    drug_response = pd.read_csv(os.path.join(input_dir_path, "response.csv"))
-    drug_smiles = pd.read_csv(os.path.join(input_dir_path, "smiles.csv"), index_col=0)
+    if raw or not os.path.exists(os.path.join(input_dir_path, "cell_line_feat.tsv")):
+        cnv_mat = pd.read_csv(os.path.join(input_dir_path, "cnv_mat.csv"), index_col=0).rename(
+            columns=lambda x: f"CNV_{x}")
+        mut_mat = pd.read_csv(os.path.join(input_dir_path, "mut_mat.csv"), index_col=0).rename(
+            columns=lambda x: f"MUT_{x}")
+        exp_mat = pd.read_csv(os.path.join(input_dir_path, "exp_mat.csv"), index_col=0).rename(
+            columns=lambda x: f"EXP_{x}")
+        cell_line_feat = pd.concat([cnv_mat, mut_mat, exp_mat], axis=1)
+    else:
+        cell_line_feat = pd.read_csv(os.path.join(input_dir_path, "cell_line_feat.csv"), index_col=0)
+    drug_response = pd.read_csv(os.path.join(input_dir_path, "drug_response.csv"))
+    drug_smiles = pd.read_csv(os.path.join(input_dir_path, "drug_smiles.csv"), index_col=0)
 
     drug_mfp = drug_smiles.apply(lambda x: get_morgan_fingerprint([x], mfp_n_bits))
     feat_mat = (
