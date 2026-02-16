@@ -218,8 +218,10 @@ def get_input_matrix(input_dir_path: str, mfp_n_bits: int = 256, raw=False) -> p
     :param mfp_n_bits: Number of bits for Morgan Fingerprint. Default is 256
     :return: Returns a dataframe with feature and target values
     """
+    from pathway_pca import get_pca_from_raw_data_read
     # These files are expected to be in the provided input folder
-    if raw or not os.path.exists(os.path.join(input_dir_path, "cell_line_feat.tsv")):
+    # Using Gene as feature for Cell lines
+    if raw:
         cnv_mat = pd.read_csv(os.path.join(input_dir_path, "cnv_mat.csv"), index_col=0).rename(
             columns=lambda x: f"CNV_{x}")
         mut_mat = pd.read_csv(os.path.join(input_dir_path, "mut_mat.csv"), index_col=0).rename(
@@ -227,6 +229,10 @@ def get_input_matrix(input_dir_path: str, mfp_n_bits: int = 256, raw=False) -> p
         exp_mat = pd.read_csv(os.path.join(input_dir_path, "exp_mat.csv"), index_col=0).rename(
             columns=lambda x: f"EXP_{x}")
         cell_line_feat = pd.concat([cnv_mat, mut_mat, exp_mat], axis=1)
+    # Create PCA feat matrix, if missing (Needed for sample data run)
+    elif not os.path.exists(os.path.join(input_dir_path, "cell_line_feat.tsv")):
+        cell_line_feat = get_pca_from_raw_data_read(input_dir_path)
+    # Read the PCA feat matrix from files, coming from previous steps.
     else:
         cell_line_feat = pd.read_csv(os.path.join(input_dir_path, "cell_line_feat.csv"), index_col=0)
     drug_response = pd.read_csv(os.path.join(input_dir_path, "drug_response.csv"))
