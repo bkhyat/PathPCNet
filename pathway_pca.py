@@ -7,7 +7,7 @@ from sklearn.decomposition import PCA
 from utils import get_pathway_genes
 
 
-def get_pathway_pcs(data: pd.DataFrame, pathways, prefix: str, n_components=4) -> pd.DataFrame:
+def get_pathway_pcs(data: pd.DataFrame, pathways, prefix: str, n_components: int) -> pd.DataFrame:
     result = pd.DataFrame(index=data.index)
 
     for pathway, genes in pathways.items():
@@ -31,11 +31,12 @@ def parse_parameter():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--in_path", required=True)
     parser.add_argument("-o", "--out_path", default="filtered_data")
+    parser.add_argument("--n_pcs", type=int, default=4)
 
     return parser.parse_args()
 
 
-def get_pca_from_raw_data_read(in_path: str):
+def get_pca_from_raw_data_read(in_path: str, n_pcs=4):
     pathways, genes = get_pathway_genes(os.path.join(in_path, "pathways.json"))
     cnv_mat = pd.read_csv(os.path.join(in_path, "cnv_mat.csv"), index_col=0)
     mut_mat = pd.read_csv(os.path.join(in_path, "mut_mat.csv"), index_col=0)
@@ -54,9 +55,9 @@ def get_pca_from_raw_data_read(in_path: str):
 
     rna_mat = rna_mat[rna_mat.columns[rna_mat.notna().all()]]
 
-    cnv_pcs = get_pathway_pcs(cnv_mat, pathways, "CNV")
-    mut_pcs = get_pathway_pcs(mut_mat, pathways, "MUT")
-    rna_pcs = get_pathway_pcs(rna_mat, pathways, "EXP")
+    cnv_pcs = get_pathway_pcs(cnv_mat, pathways, "CNV", n_pcs)
+    mut_pcs = get_pathway_pcs(mut_mat, pathways, "MUT", n_pcs)
+    rna_pcs = get_pathway_pcs(rna_mat, pathways, "EXP", n_pcs)
 
     return pd.concat([cnv_pcs, mut_pcs, rna_pcs], axis=1)
 
