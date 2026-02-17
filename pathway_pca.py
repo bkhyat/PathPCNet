@@ -40,7 +40,7 @@ def get_pca_from_raw_data_read(in_path: str, n_pcs=4):
     pathways, genes = get_pathway_genes(os.path.join(in_path, "pathways.json"))
     cnv_mat = pd.read_csv(os.path.join(in_path, "cnv_mat.csv"), index_col=0)
     mut_mat = pd.read_csv(os.path.join(in_path, "mut_mat.csv"), index_col=0)
-    rna_mat = pd.read_csv(os.path.join(in_path, "rna_mat.csv"), index_col=0)
+    exp_mat = pd.read_csv(os.path.join(in_path, "exp_mat.csv"), index_col=0)
 
     for c in cnv_mat:
         rang = cnv_mat[c].max() - cnv_mat[c].min()
@@ -49,15 +49,15 @@ def get_pca_from_raw_data_read(in_path: str, n_pcs=4):
     cnv_mat = cnv_mat.fillna(0)  # Indicates normal copy
     mut_mat = mut_mat.fillna(0)  # Indicates absence of mutation
 
-    for c in rna_mat:
-        rang = rna_mat[c].max() - rna_mat[c].min()
-        rna_mat[c] = (rna_mat[c] - rna_mat[c].min()) / rang
+    for c in exp_mat:
+        rang = exp_mat[c].max() - exp_mat[c].min()
+        exp_mat[c] = (exp_mat[c] - exp_mat[c].min()) / rang
 
-    rna_mat = rna_mat[rna_mat.columns[rna_mat.notna().all()]]
+    exp_mat = exp_mat[exp_mat.columns[exp_mat.notna().all()]]
 
     cnv_pcs = get_pathway_pcs(cnv_mat, pathways, "CNV", n_pcs)
     mut_pcs = get_pathway_pcs(mut_mat, pathways, "MUT", n_pcs)
-    rna_pcs = get_pathway_pcs(rna_mat, pathways, "EXP", n_pcs)
+    rna_pcs = get_pathway_pcs(exp_mat, pathways, "EXP", n_pcs)
 
     return pd.concat([cnv_pcs, mut_pcs, rna_pcs], axis=1)
 

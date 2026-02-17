@@ -129,7 +129,7 @@ if __name__ == '__main__':
 
     cnv_mat.loc[common_cell_lines].to_csv(os.path.join(args.out_path, "cnv_mat.csv"))
     mut_mat.loc[common_cell_lines].to_csv(os.path.join(args.out_path, "mut_mat.csv"))
-    rna_mat.loc[common_cell_lines].to_csv(os.path.join(args.out_path, "rna_mat.csv"))
+    rna_mat.loc[common_cell_lines].to_csv(os.path.join(args.out_path, "exp_mat.csv"))
     (
         drug_response[drug_response.index.get_level_values(0).isin(common_cell_lines)][["LN_IC50"]]
         .to_csv(os.path.join(args.out_path, "drug_response.csv"))
