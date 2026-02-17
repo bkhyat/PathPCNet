@@ -58,7 +58,7 @@ def get_cnv_data(file_path, cell_line_mapping, gene_subset=None, seg_mean=True):
     df = df[mask]
 
     if seg_mean:
-        df.pivot(columns=["symbol"], index="model_id", values="seg_mean")
+        return df.pivot(columns=["symbol"], index="model_id", values="seg_mean")
     else:
         return (df.pivot(columns=["symbol"], index="model_id", values="cn_category")
                 .replace({"Deletion": -2, "Loss": -1, "Neutral": 0, "Gain": 1, "Amplification": 2})
@@ -111,14 +111,14 @@ if __name__ == '__main__':
         ["Model ID", "COSMIC ID"])
 
     drug_smiles = pull_smiles_from_pubchem(os.path.join(args.in_path, args.drugs))
-    drug_response = pd.read_csv(os.path.join(args.in_path, args.response), index_col=[0, 1])
+    drug_response = pd.read_excel(os.path.join(args.in_path, args.response))
     drug_response = drug_response.loc[drug_response["DRUG_ID"].isin(drug_smiles.explode("smiles").dropna().index)]
-
+    drug_response.set_index(["COSMIC_ID", "DRUG_ID"], inplace=True)
     cell_line_mapping = cell_line_mapping[
         cell_line_mapping["COSMIC ID"].isin(drug_response.index.get_level_values(level=0).unique())]
 
     rna_mat = get_rna_data(os.path.join(args.in_path, args.rna), cell_line_mapping, genes)
-    cnv_mat = get_cnv_data(os.path.join(args.in_path, args.cnv), cell_line_mapping, genes)
+    cnv_mat = get_cnv_data(os.path.join(args.in_path, args.cnv), cell_line_mapping, genes, seg_mean=False)
     mut_mat = get_mut_data(os.path.join(args.in_path, args.mutation), cell_line_mapping, genes)
 
     common_cell_lines = sorted(
@@ -130,9 +130,8 @@ if __name__ == '__main__':
     cnv_mat.loc[common_cell_lines].to_csv(os.path.join(args.out_path, "cnv_mat.csv"))
     mut_mat.loc[common_cell_lines].to_csv(os.path.join(args.out_path, "mut_mat.csv"))
     rna_mat.loc[common_cell_lines].to_csv(os.path.join(args.out_path, "rna_mat.csv"))
-    (drug_response
-     .loc[drug_response["COSMIC_ID"]
-     .isin(common_cell_lines)][["DRUG_ID", "COSMIC_ID", "LN_IC50"]]
-     .to_csv(os.path.join(args.out_path, "response.csv"))
-     )
+    (
+        drug_response[drug_response.index.get_level_values(0).isin(common_cell_lines)][["LN_IC50"]]
+        .to_csv(os.path.join(args.out_path, "drug_response.csv"))
+    )
     drug_smiles.to_csv(os.path.join(args.out_path, "drug_smiles.csv"))
