@@ -11,7 +11,7 @@ from utils import get_input_matrix, filter_pc_columns
 def parse_parameter():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--in_path", required=True)
-    parser.add_argument("-o", "--out_path", type=str)
+    parser.add_argument("-o", "--out_path", required=True, type=str)
     parser.add_argument("--n_pcs", default=3, type=int)
     return parser.parse_args()
 
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     args = parse_parameter()
     os.makedirs(args.out_path, exist_ok=True)
 
-    all_df = get_input_matrix(args.input_path, mfp_n_bits=256, n_pcs=args.n_pcs)
+    all_df = get_input_matrix(args.in_path, mfp_n_bits=256, n_pcs=args.n_pcs)
 
     all_metrics = []
     start = datetime.now()
