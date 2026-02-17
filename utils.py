@@ -239,11 +239,11 @@ def get_input_matrix(input_dir_path: str, mfp_n_bits: int = 256, n_pcs=4, raw=Fa
     drug_response = pd.read_csv(os.path.join(input_dir_path, "drug_response.csv"))
     drug_smiles = pd.read_csv(os.path.join(input_dir_path, "drug_smiles.csv"), index_col=0)
 
-    drug_mfp = drug_smiles.apply(lambda x: get_morgan_fingerprint([x], mfp_n_bits))
+    drug_mfp = drug_smiles["SMILES"].apply(lambda x: get_morgan_fingerprint([x], mfp_n_bits))
     feat_mat = (
         drug_response
+        .merge(drug_mfp.explode().apply(pd.Series), left_on="DRUG_ID", right_index=True)
         .merge(cell_line_feat, left_on='COSMIC_ID', right_index=True)
-        .merge(drug_mfp, left_on="DRUG_ID", right_index=True)
         .set_index(["COSMIC_ID", "DRUG_ID"])
     )
 

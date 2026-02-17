@@ -61,7 +61,12 @@ def pull_smiles_from_pubchem(file_path: str) -> pd.DataFrame:
     for _, row in df.iterrows():
         smiles.append(pull_smiles(row))
 
-    df["smiles"] = smiles
+    if smiles:
+        df["SMILES"] = smiles
+    else:
+        df["SMILES"] = float("nan")
+
+    return df.dropna(subset=["SMILES"])
 
     return df
 
@@ -82,10 +87,10 @@ if __name__ == "__main__":
     drugs_df = drugs_df.loc[drugs_df["datasets"].eq("GDSC2")]
     drugs_df.reset_index(drop=True)
     smiles = drugs_df.apply(pull_smiles, axis=1)
-    drugs_df["smiles"] = smiles
+    drugs_df["SMILES"] = smiles
     drugs_df = drugs_df[drugs_df.smiles.str.len() == 1].reset_index(drop=True)
-    drugs_df = drugs_df.explode("smiles")
-    drugs_df = drugs_df.loc[drugs_df.groupby("smiles")["number of cell lines"].idxmax()].reset_index(drop=True)
+    drugs_df = drugs_df.explode("SMILES")
+    drugs_df = drugs_df.loc[drugs_df.groupby("SMILES")["number of cell lines"].idxmax()].reset_index(drop=True)
     file_path = os.path.join(args.out_path,
                              os.path.splitext(os.path.basename(args.drug_list_file_path))[0] + "SMILES.csv")
     drugs_df.to_csv(file_path, index=False)
