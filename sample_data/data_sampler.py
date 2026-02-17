@@ -47,7 +47,7 @@ def create_sample_data(input_path: str = "", output_path: str = "sample_data"):
     exp_mat.loc[filtered_cell_lines, list(genes)].to_csv(os.path.join(output_path, "exp_mat.csv"))
     mut_mat.loc[filtered_cell_lines, list(genes)].to_csv(os.path.join(output_path, "mut_mat.csv"))
 
-    drug_response.to_csv(os.path.join(output_path, "drug_response.csv"))
+    drug_response.to_csv(os.path.join(output_path, "drug_response.csv"), index=False)
     smiles.to_csv(os.path.join(output_path, "drug_smiles.csv"))
 
     with open(os.path.join(output_path, "pathways.json"), "w") as f:
