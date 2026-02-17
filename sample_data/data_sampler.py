@@ -28,7 +28,7 @@ def create_sample_data(input_path: str = "", output_path: str = "sample_data"):
 
     # Randomly sample 50 cell lines:
     common_cell_lines = list(common_cell_lines)
-    filtered_cell_lines = random.choices(common_cell_lines, k=50)
+    filtered_cell_lines = random.sample(common_cell_lines, k=50)
 
     drug_response = drug_response[drug_response["COSMIC_ID"].isin(filtered_cell_lines)]
 
@@ -56,7 +56,7 @@ def create_sample_data(input_path: str = "", output_path: str = "sample_data"):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--in_path", type=str, default="processed_data")
+    parser.add_argument("--in_path", type=str)
     parser.add_argument("--out_path", type=str, default="./")
 
     return parser.parse_args()
