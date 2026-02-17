@@ -53,9 +53,10 @@ def pull_smiles(row):
 
 def pull_smiles_from_pubchem(file_path: str) -> pd.DataFrame:
     df = pd.read_csv(file_path)
-
+    df.columns = df.columns.str.strip().str.lower()
+    df = df[df.datasets.eq("GDSC2")]
     df = df[df["pubchem"].apply(lambda x: isinstance(x, str) and all(c.isdigit() for c in x))].set_index(
-        "drug_id").sort_index()
+        "drug id").sort_index()
     smiles = []
     for _, row in df.iterrows():
         smiles.append(pull_smiles(row))
