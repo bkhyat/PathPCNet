@@ -27,7 +27,7 @@ default behavior is to run all these five models if models argument is not passe
 
 ### 1. The deep learning network on PathwayPC SAMPLE data
 ```shell
-python run.py 
+python run.py -i sample_data -o output --n_pcs 1 --n_mfp_bits 128 -cv 5 --cuda -1 -e 20 -lr 0.1 -b 32
 ```
 
 ## Running Full Experiment
