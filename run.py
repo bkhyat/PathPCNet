@@ -1,20 +1,19 @@
 import argparse
-import os
 import json
-import time
-from ast import parse
+import os
+from datetime import datetime
 from pathlib import Path
 
-import torch
-from datetime import datetime
-import pandas as pd
 import numpy as np
-import sklearn.model_selection as skms
-import sklearn.metrics as skmts
-import sklearn.utils as skut
+import pandas as pd
 import shap
+import sklearn.metrics as skmts
+import sklearn.model_selection as skms
+import sklearn.utils as skut
+import torch
+
 from model import PathPCNet
-from utils import set_seed, get_device, evaluate_model, NumpyDataset, get_input_matrix, filter_pc_columns
+from utils import set_seed, evaluate_model, NumpyDataset, get_input_matrix, filter_pc_columns
 
 SEED = 42
 CV_K = 10
@@ -24,6 +23,7 @@ EPOCH = 2000
 BATCH_SIZE = 20
 
 SYSTEM_TIME = datetime.now().strftime("%Y%m%d-%H%M%S")
+
 
 def run_evaluation(df, device, args):
     model_metrics = []
@@ -94,6 +94,7 @@ def run_evaluation(df, device, args):
 
     return model_metrics
 
+
 def parse_parameter():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--in_path", required=True)
@@ -133,7 +134,7 @@ if __name__ == "__main__":
 
     print(f"n_pc:{args.n_pcs}, shape:{df.shape}")
     metrics = run_evaluation(df, device, args)
-    print("="*40)
+    print("=" * 40)
     with open(os.path.join(args.out_path, f"{SYSTEM_TIME}_model_metrics.json"), "w") as f:
         json.dump(metrics, f)
-    print("Execution Finished\n"+f"Output files written at: {Path(args.out_path).resolve()}\n"+"="*40)
+    print("Execution Finished\n" + f"Output files written at: {Path(args.out_path).resolve()}\n" + "=" * 40)
