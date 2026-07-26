@@ -34,7 +34,7 @@ class PathPCNet(torch.nn.Module):
     def forward(self, x):
         return self.model(x)
 
-    def fit(self, train_dl, valid_dl, epochs, learning_rate, device, opt_fn, path="checkpoint.pt", verbose=False):
+    def fit(self, train_dl, valid_dl, epochs, learning_rate, device, opt_fn, path="checkpoint.pt", verbose=False, validate=True):
         """
         Return train and valid performance including loss
 
@@ -47,6 +47,7 @@ class PathPCNet(torch.nn.Module):
         :param opt_fn: optimization function in torch (e.g., tch.optim.Adam)
         :param path: string representing path
         :param verbose: bool
+        :param validate: bool It is true for hyperparameter tuning but False for training the model
         """
         # setup
         criterion = RMSELoss()  # setup LOSS function
@@ -78,28 +79,31 @@ class PathPCNet(torch.nn.Module):
             avg_train_loss = train_epoch_loss / len(train_dl)
             train_loss_list.append(avg_train_loss)
             ## validation phase
-            with torch.no_grad():
-                net.eval()
-                valid_epoch_loss = 0.0  # save loss for each epoch, batch by batch
-                for i, (X_valid, y_valid) in enumerate(valid_dl):
-                    X_valid, y_valid = X_valid.to(device), y_valid.to(device)  # load data onto the device
-                    y_valid_pred = net(X_valid)  # valid result
-                    valid_loss = criterion(y_valid_pred, y_valid.float())  # y_valid.unsqueeze(1)) # calculate loss
-                    valid_epoch_loss += valid_loss.item()  # adding loss from each batch
-            # calculate total loss of all batches, and append to result list
-            avg_valid_loss = valid_epoch_loss / len(valid_dl)
-            valid_loss_list.append(avg_valid_loss)
+            message = f"Epoch: {epoch} Training Loss:{avg_train_loss}"
+            if validate:
+                with torch.no_grad():
+                    net.eval()
+                    valid_epoch_loss = 0.0  # save loss for each epoch, batch by batch
+                    for i, (X_valid, y_valid) in enumerate(valid_dl):
+                        X_valid, y_valid = X_valid.to(device), y_valid.to(device)  # load data onto the device
+                        y_valid_pred = net(X_valid)  # valid result
+                        valid_loss = criterion(y_valid_pred, y_valid.float())  # y_valid.unsqueeze(1)) # calculate loss
+                        valid_epoch_loss += valid_loss.item()  # adding loss from each batch
+                # calculate total loss of all batches, and append to result list
+                avg_valid_loss = valid_epoch_loss / len(valid_dl)
+                valid_loss_list.append(avg_valid_loss)
+                message += f", Validation Loss:{avg_valid_loss}"
+                early_stopping(avg_valid_loss, net)
             if verbose:
-                print(f"Epoch: {epoch} Training Loss:{avg_train_loss}, Validation Loss: {avg_valid_loss}")
-
-            early_stopping(avg_valid_loss, net)
+                print(message)
 
             if early_stopping.early_stop:
                 print("Early stopping")
                 break
 
-        # load the last checkpoint with the best model
-        net.load_state_dict(torch.load(path))
+        if validate:
+            # load the last checkpoint with the best model
+            net.load_state_dict(torch.load(path))
 
         return train_loss_list, valid_loss_list
 
